@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLACKPINK 'JUMP' View Counter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hidden { display: none; }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #111827; /* bg-gray-900 */
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            color: #d1d5db; /* text-gray-300 */
+        }
+        .leaderboard-gradient {
+            background: linear-gradient(180deg, #f79aaf 0%, #000000 100%);
+        }
+    </style>
+</head>
+<body class="bg-black text-gray-200">
+
+    <div id="auth-section" class="min-h-screen flex items-center justify-center bg-black">
+        <div class="max-w-md w-full bg-gray-900 p-8 rounded-xl shadow-lg">
+            <div id="login-form">
+                <h2 class="text-3xl font-bold text-center mb-6 text-[#f79aaf]">Login</h2>
+                <div class="space-y-4">
+                    <input type="email" id="login-email" placeholder="Email" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f79aaf]">
+                    <input type="password" id="login-password" placeholder="Password" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f79aaf]">
+                    <button id="login-btn" class="w-full bg-[#f79aaf] text-white font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition">Login</button>
+                </div>
+                <p class="text-center mt-4">
+                    Don't have an account? <a href="#" id="show-register" class="text-[#f79aaf] hover:underline">Register here</a>
+                </p>
+            </div>
+            <div id="register-form" class="hidden">
+                <h2 class="text-3xl font-bold text-center mb-6 text-[#f79aaf]">Register</h2>
+                <div class="space-y-4">
+                    <input type="text" id="register-name" placeholder="Name" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f79aaf]">
+                    <input type="email" id="register-email" placeholder="Email" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f79aaf]">
+                    <input type="password" id="register-password" placeholder="Password" class="w-full px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f79aaf]">
+                    <button id="register-btn" class="w-full bg-[#f79aaf] text-white font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition">Register</button>
+                </div>
+                 <p class="text-center mt-4">
+                    Already have an account? <a href="#" id="show-login" class="text-[#f79aaf] hover:underline">Login here</a>
+                </p>
+            </div>
+             <p id="auth-error" class="text-red-500 text-center mt-4"></p>
+        </div>
+    </div>
+
+    <div id="app-section" class="hidden">
+        <nav class="bg-gray-900 shadow-md p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-[#f79aaf]">JUMP M/V View Counter</h1>
+            <div>
+                <span id="user-name" class="mr-4 font-semibold"></span>
+                <button id="logout-btn" class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">Logout</button>
+            </div>
+        </nav>
+
+        <div class="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-gray-900 p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold mb-4 text-white">Upload Your Screenshot</h2>
+                    <p class="mb-4 text-gray-400">Upload a screenshot of you watching the "JUMP" M/V from BLACKPINK's official channel. We'll verify the video, channel, and the time.</p>
+                    <input type="file" id="image-upload" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-[#f79aaf] hover:file:bg-[#f79aaf] hover:file:text-white">
+
+                    <div id="image-preview-container" class="mt-4 hidden w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-600">
+                        <img id="image-preview" src="#" alt="Preview" class="max-h-full max-w-full rounded-md object-contain">
+                    </div>
+
+                    <button id="submit-btn" class="w-full mt-4 bg-[#f79aaf] text-white font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition disabled:bg-gray-400 flex items-center justify-center" disabled>
+                        <span id="submit-btn-text">Submit for View Count</span>
+                        <svg id="submit-spinner" class="animate-spin h-5 w-5 ml-3 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5m15-5a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </button>
+                </div>
+                <div class="bg-gray-900 p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-2 text-white">Your Stats</h3>
+                    <p>Total Views: <span id="user-view-count" class="font-bold text-2xl text-[#f79aaf]">0</span></p>
+                    <p>Last Submission: <span id="user-last-submission" class="font-semibold text-gray-300">N/A</span></p>
+                    <p id="next-submission-info" class="text-sm text-gray-400 mt-2"></p>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 p-6 rounded-xl shadow-lg leaderboard-gradient">
+                <h2 class="text-3xl font-bold mb-4 text-center text-white">🏆 Leaderboard 🏆</h2>
+                <div id="leaderboard" class="space-y-3">
+                    <p class="text-center text-white">Loading leaderboard...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="modal-title" class="text-2xl font-bold mb-2 text-white"></h3>
+            <p id="modal-message" class="mb-4"></p>
+            <button id="modal-close-btn" class="bg-[#f79aaf] text-white px-6 py-2 rounded-lg hover:bg-opacity-90">Close</button>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // --- Firebase SDK Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, limit, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // --- Firebase Config ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmj_MCi0S5oWccuAllapmCSgS1wgh7YtQ",
+            authDomain: "view-counter-6d58c.firebaseapp.com",
+            projectId: "view-counter-6d58c",
+            storageBucket: "view-counter-6d58c.appspot.com",
+            messagingSenderId: "796950664723",
+            appId: "1:796950664723:web:f4589638e698642f5211e6"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // --- Firebase Initialization ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- DOM Elements ---
+        const authSection = document.getElementById('auth-section');
+        const appSection = document.getElementById('app-section');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const showRegister = document.getElementById('show-register');
+        const showLogin = document.getElementById('show-login');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const loginEmail = document.getElementById('login-email');
+        const loginPassword = document.getElementById('login-password');
+        const registerName = document.getElementById('register-name');
+        const registerEmail = document.getElementById('register-email');
+        const registerPassword = document.getElementById('register-password');
+        const authError = document.getElementById('auth-error');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userNameSpan = document.getElementById('user-name');
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitBtnText = document.getElementById('submit-btn-text');
+        const submitSpinner = document.getElementById('submit-spinner');
+        const userViewCount = document.getElementById('user-view-count');
+        const userLastSubmission = document.getElementById('user-last-submission');
+        const nextSubmissionInfo = document.getElementById('next-submission-info');
+        const leaderboardDiv = document.getElementById('leaderboard');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        let currentUser = null;
+        let userDocUnsubscribe = null;
+        let leaderboardUnsubscribe = null;
+        let file = null;
+
+        // --- Authentication Logic ---
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            authError.textContent = '';
+        });
+
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            authError.textContent = '';
+        });
+
+        registerBtn.addEventListener('click', async () => {
+            authError.textContent = '';
+            if (!registerName.value) {
+                authError.textContent = 'Please enter your name.';
+                return;
+            }
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, registerEmail.value, registerPassword.value);
+                const user = userCredential.user;
+                const userRef = doc(db, `artifacts/${appId}/public/data/users`, user.uid);
+                await setDoc(userRef, {
+                    name: registerName.value,
+                    email: user.email,
+                    viewCount: 0,
+                    lastScreenshotTime: null,
+                    userId: user.uid
+                });
+            } catch (error) {
+                authError.textContent = error.message;
+            }
+        });
+
+        loginBtn.addEventListener('click', async () => {
+            authError.textContent = '';
+            try {
+                await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+            } catch (error) {
+                authError.textContent = error.message;
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            await signOut(auth);
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                authSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                listenToUserData(user.uid);
+                listenToLeaderboard();
+            } else {
+                currentUser = null;
+                authSection.classList.remove('hidden');
+                appSection.classList.add('hidden');
+                if (userDocUnsubscribe) userDocUnsubscribe();
+                if (leaderboardUnsubscribe) leaderboardUnsubscribe();
+            }
+        });
+
+        // --- Firestore Listeners ---
+        function listenToUserData(userId) {
+            const userRef = doc(db, `artifacts/${appId}/public/data/users`, userId);
+            userDocUnsubscribe = onSnapshot(userRef, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    userNameSpan.textContent = data.name;
+                    userViewCount.textContent = data.viewCount;
+                    if (data.lastScreenshotTime) {
+                        const date = new Date(data.lastScreenshotTime);
+                        userLastSubmission.textContent = date.toLocaleString();
+
+                        // Only show cooldown message after initial views are used up
+                        if (data.viewCount >= 3) {
+                            const tenMinutes = 10 * 60 * 1000;
+                            const nextSubmissionTime = date.getTime() + tenMinutes;
+                            const now = Date.now();
+                            if (now < nextSubmissionTime) {
+                                const minutesLeft = Math.ceil((nextSubmissionTime - now) / 60000);
+                                nextSubmissionInfo.textContent = `You can submit your next view in about ${minutesLeft} minute(s).`;
+                            } else {
+                                nextSubmissionInfo.textContent = 'You are eligible to submit a new view.';
+                            }
+                        } else {
+                            nextSubmissionInfo.textContent = 'You are eligible to submit a new view.';
+                        }
+
+                    } else {
+                        userLastSubmission.textContent = 'N/A';
+                        nextSubmissionInfo.textContent = 'Upload a screenshot to get started!';
+                    }
+                }
+            });
+        }
+
+        function listenToLeaderboard() {
+            const usersRef = collection(db, `artifacts/${appId}/public/data/users`);
+            const q = query(usersRef, orderBy("viewCount", "desc"), limit(10));
+            leaderboardUnsubscribe = onSnapshot(q, (snapshot) => {
+                leaderboardDiv.innerHTML = '';
+                if (snapshot.empty) {
+                    leaderboardDiv.innerHTML = '<p class="text-center text-white">No submissions yet.</p>';
+                    return;
+                }
+                let rank = 1;
+                const rankIcons = ['🥇', '🥈', '🥉'];
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    const isCurrentUser = user.userId === currentUser?.uid;
+                    const entry = document.createElement('div');
+                    entry.className = `flex justify-between items-center p-3 rounded-lg transition-transform transform hover:scale-105 ${isCurrentUser ? 'bg-white/20 border-2 border-white' : 'bg-black/20'}`;
+
+                    const rankIcon = rank <= 3 ? rankIcons[rank - 1] : `<span class="font-bold w-6 text-white">${rank}.</span>`;
+
+                    entry.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            ${rankIcon}
+                            <span class="font-bold text-lg text-white">${user.name}</span>
+                            ${isCurrentUser ? '<span class="text-xs font-semibold bg-white text-[#f79aaf] px-2 py-1 rounded-full">You</span>' : ''}
+                        </div>
+                        <span class="font-bold text-xl text-white">${user.viewCount}</span>
+                    `;
+                    leaderboardDiv.appendChild(entry);
+                    rank++;
+                });
+            });
+        }
+
+        // --- App Logic ---
+        imageUpload.addEventListener('change', (event) => {
+            file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+                submitBtn.disabled = false;
+            }
+        });
+
+        submitBtn.addEventListener('click', async () => {
+            if (!file || !currentUser) return;
+            setLoading(true);
+
+            try {
+                // 1. Analyze image first
+                const base64ImageData = await toBase64(file);
+                const analysis = await analyzeImage(base64ImageData);
+
+                if (!analysis || !analysis.videoTitle || !analysis.channelName) {
+                    showModal('Analysis Failed', 'Could not identify the video details. Please try a clearer screenshot from the official channel.');
+                    setLoading(false);
+                    return;
+                }
+
+                // 2. Validate video title and channel
+                const isCorrectVideo = analysis.videoTitle.toLowerCase().includes('jump');
+                const isCorrectChannel = analysis.channelName.toLowerCase().includes('blackpink');
+
+                if (!isCorrectVideo || !isCorrectChannel) {
+                    showModal('Incorrect Video', `This doesn't seem to be the "JUMP" M/V from BLACKPINK's official channel. Please try again.`);
+                    setLoading(false);
+                    return;
+                }
+
+                // 3. Upload screenshot ONLY if valid
+                const screenshotUrl = await uploadScreenshot(file);
+
+                // 4. Process the view count
+                await processViewCount(screenshotUrl, analysis);
+
+            } catch (error) {
+                console.error("Submission Error:", error);
+                showModal('Error', 'An unexpected error occurred. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        async function uploadScreenshot(file) {
+            const filePath = `artifacts/${appId}/public/screenshots/${currentUser.uid}/${Date.now()}-${file.name}`;
+            const storageRef = ref(storage, filePath);
+            await uploadBytes(storageRef, file);
+            const downloadUrl = await getDownloadURL(storageRef);
+            return downloadUrl;
+        }
+
+        async function processViewCount(screenshotUrl, analysis) {
+            const userRef = doc(db, `artifacts/${appId}/public/data/users`, currentUser.uid);
+            const userDoc = await getDoc(userRef);
+            if (!userDoc.exists()) {
+                showModal('Error', 'Could not find your user data.');
+                return;
+            }
+
+            const userData = userDoc.data();
+            const viewCount = userData.viewCount;
+            const lastTime = userData.lastScreenshotTime ? new Date(userData.lastScreenshotTime) : null;
+            const newTime = new Date();
+
+            const canSubmit = () => {
+                if (viewCount < 3) return true; // Allow first 3 submissions without time check
+                const tenMinutes = 10 * 60 * 1000;
+                return !lastTime || (newTime.getTime() - lastTime.getTime()) >= tenMinutes;
+            };
+
+            if (canSubmit()) {
+                // Add to submissions sub-collection
+                const submissionsRef = collection(db, `artifacts/${appId}/public/data/users`, currentUser.uid, 'submissions');
+                await addDoc(submissionsRef, {
+                    screenshotUrl: screenshotUrl,
+                    analyzedVideoTitle: analysis.videoTitle,
+                    analyzedChannelName: analysis.channelName,
+                    analyzedScreenshotTime: analysis.screenshotTime,
+                    submittedAt: serverTimestamp()
+                });
+
+                // Update user's main doc
+                await setDoc(userRef, { viewCount: viewCount + 1, lastScreenshotTime: newTime.toISOString() }, { merge: true });
+                showModal('Success!', 'Your view has been counted! Keep streaming, BLINK!');
+            } else {
+                const tenMinutes = 10 * 60 * 1000;
+                const minutesLeft = Math.ceil((tenMinutes - (newTime.getTime() - lastTime.getTime())) / 60000);
+                showModal('Too Soon!', `Please wait another ${minutesLeft} minute(s) before submitting again.`);
+            }
+        }
+
+        // --- Gemini API Call ---
+        async function analyzeImage(base64ImageData) {
+            const apiKey = "AIzaSyDPVkg07j7e_c3zD36plO3arVAd2qU6sn8"; // Provided by environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+            const prompt = "Analyze this YouTube screenshot. What is the video title? What is the YouTube channel name? What is the time displayed in the system's clock (e.g., top right or bottom right of the screen)? Respond ONLY with a JSON object with three keys: `videoTitle` (string), `channelName` (string), and `screenshotTime` (string). If any piece of information isn't clear or visible, set its corresponding value to null.";
+
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        { inline_data: { mime_type: file.type, data: base64ImageData } }
+                    ]
+                }],
+                generation_config: { response_mime_type: "application/json" }
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) throw new Error(`API request failed: ${response.statusText}`);
+
+            const result = await response.json();
+
+            if (result.candidates && result.candidates.length > 0) {
+                try {
+                     return JSON.parse(result.candidates[0].content.parts[0].text);
+                } catch(e) {
+                    console.error("Failed to parse JSON from Gemini:", e);
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        // --- Utility Functions ---
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.toString().replace(/^data:(.*,)?/, ''));
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function setLoading(isLoading) {
+            submitBtn.disabled = isLoading;
+            if (isLoading) {
+                submitBtnText.textContent = 'Analyzing...';
+                submitSpinner.classList.remove('hidden');
+            } else {
+                submitBtnText.textContent = 'Submit for View Count';
+                submitSpinner.classList.add('hidden');
+            }
+        }
+
+        function showModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.classList.remove('hidden');
+        }
+
+        modalCloseBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+    </script>
+</body>
+</html>

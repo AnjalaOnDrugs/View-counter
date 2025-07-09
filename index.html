@@ -22,23 +22,83 @@
             z-index: 1000;
         }
         .modal-content {
-            background: #111827; /* bg-gray-900 */
+            background: #111827;
             padding: 2rem;
             border-radius: 0.75rem;
             max-width: 90%;
             width: 400px;
             text-align: center;
-            color: #d1d5db; /* text-gray-300 */
+            color: #d1d5db;
         }
-        .leaderboard-gradient {
-            background: linear-gradient(180deg, #f79aaf 0%, #000000 100%);
+        .leaderboard-container {
+             background: rgba(17, 24, 39, 0.8);
+             backdrop-filter: blur(10px);
+             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        .rank-1 {
+            background: linear-gradient(145deg, #FFD700, #F0C400);
+            border: 1px solid #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+         .rank-2 {
+            background: linear-gradient(145deg, #C0C0C0, #A9A9A9);
+            border: 1px solid #C0C0C0;
+            box-shadow: 0 0 15px rgba(192, 192, 192, 0.5);
+        }
+        .rank-3 {
+            background: linear-gradient(145deg, #CD7F32, #B8732E);
+            border: 1px solid #CD7F32;
+            box-shadow: 0 0 15px rgba(205, 127, 50, 0.5);
+        }
+        .rank-default {
+             background: rgba(255, 255, 255, 0.05);
+             border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+         .current-user-highlight {
+            border: 2px solid #f79aaf;
+        }
+        .history-item-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        /* Tab styles */
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background: #f79aaf;
+            color: white;
+        }
+        .tab-button:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            color: #d1d5db;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .mobile-tab-content {
+                min-height: calc(100vh - 200px);
+            }
+            .compact-stats {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+            .compact-stat-item {
+                text-align: center;
+                padding: 1rem;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 0.5rem;
+            }
+        }
+        
     </style>
 </head>
 <body class="bg-black text-gray-200">
 
     <div id="auth-section" class="min-h-screen flex items-center justify-center bg-black">
-        <div class="max-w-md w-full bg-gray-900 p-8 rounded-xl shadow-lg">
+        <div class="max-w-md w-full bg-gray-900 p-8 rounded-xl shadow-lg mx-4">
             <div id="login-form">
                 <h2 class="text-3xl font-bold text-center mb-6 text-[#f79aaf]">Login</h2>
                 <div class="space-y-4">
@@ -68,41 +128,131 @@
 
     <div id="app-section" class="hidden">
         <nav class="bg-gray-900 shadow-md p-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-[#f79aaf]">JUMP M/V View Counter</h1>
-            <div>
-                <span id="user-name" class="mr-4 font-semibold"></span>
-                <button id="logout-btn" class="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">Logout</button>
+            <h1 class="text-xl md:text-2xl font-bold text-[#f79aaf]">BPSL</h1>
+            <div class="flex items-center gap-2">
+                <span id="user-name" class="text-sm md:text-base font-semibold hidden md:inline"></span>
+                <button id="logout-btn" class="bg-gray-700 text-white px-3 py-2 text-sm rounded-lg hover:bg-gray-600 transition">Logout</button>
             </div>
         </nav>
 
-        <div class="container mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-gray-900 p-6 rounded-xl shadow-lg">
-                    <h2 class="text-2xl font-bold mb-4 text-white">Upload Your Screenshot</h2>
-                    <p class="mb-4 text-gray-400">Upload a screenshot of you watching the "JUMP" M/V from BLACKPINK's official channel. We'll verify the video, channel, and the time.</p>
-                    <input type="file" id="image-upload" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-[#f79aaf] hover:file:bg-[#f79aaf] hover:file:text-white">
-
-                    <div id="image-preview-container" class="mt-4 hidden w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-600">
-                        <img id="image-preview" src="#" alt="Preview" class="max-h-full max-w-full rounded-md object-contain">
-                    </div>
-
-                    <button id="submit-btn" class="w-full mt-4 bg-[#f79aaf] text-white font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition disabled:bg-gray-400 flex items-center justify-center" disabled>
-                        <span id="submit-btn-text">Submit for View Count</span>
-                        <svg id="submit-spinner" class="animate-spin h-5 w-5 ml-3 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5m15-5a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </button>
+        <div class="container mx-auto p-4">
+             <div id="countdown-banner" class="relative bg-gradient-to-r from-gray-800 to-gray-900 border border-[#f79aaf]/30 p-4 rounded-xl shadow-lg mb-6 text-center">
+                <button id="close-countdown-btn" class="absolute top-2 right-3 text-gray-400 hover:text-white transition-colors">&times;</button>
+                <h2 class="text-xl font-bold text-[#f79aaf]">Jump M/V Release</h2>
+                <div id="countdown-timer" class="text-3xl md:text-4xl font-bold my-2">
+                    <span id="days">00</span>d :
+                    <span id="hours">00</span>h :
+                    <span id="minutes">00</span>m :
+                    <span id="seconds">00</span>s
                 </div>
-                <div class="bg-gray-900 p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold mb-2 text-white">Your Stats</h3>
-                    <p>Total Views: <span id="user-view-count" class="font-bold text-2xl text-[#f79aaf]">0</span></p>
-                    <p>Last Submission: <span id="user-last-submission" class="font-semibold text-gray-300">N/A</span></p>
-                    <p id="next-submission-info" class="text-sm text-gray-400 mt-2"></p>
+                <p class="text-xs text-gray-400">Warning: All Entries will be reset after the release.</p>
+            </div>
+
+
+            <div class="hidden lg:grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-gray-900 p-6 rounded-xl shadow-lg">
+                        <h2 class="text-2xl font-bold mb-4 text-white">Upload Your Screenshot</h2>
+                        <p class="mb-4 text-gray-400">Upload a screenshot of you watching the "JUMP" M/V from BLACKPINK's official channel. We'll verify the video, channel, and the time.</p>
+                        <input type="file" id="image-upload" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-[#f79aaf] hover:file:bg-[#f79aaf] hover:file:text-white">
+
+                        <div id="image-preview-container" class="mt-4 hidden w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-600">
+                            <img id="image-preview" src="#" alt="Preview" class="max-h-full max-w-full rounded-md object-contain">
+                        </div>
+
+                        <button id="submit-btn" class="w-full mt-4 bg-[#f79aaf] text-white font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition disabled:bg-gray-400 flex items-center justify-center" disabled>
+                            <span id="submit-btn-text">Submit for View Count</span>
+                            <svg id="submit-spinner" class="animate-spin h-5 w-5 ml-3 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5m15-5a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </button>
+                    </div>
+                    <div class="bg-gray-900 p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-2 text-white">Your Stats</h3>
+                        <p>Total Views: <span id="user-view-count" class="font-bold text-2xl text-[#f79aaf]">0</span></p>
+                        <p>Last Submission: <span id="user-last-submission" class="font-semibold text-gray-300">N/A</span></p>
+                        <p id="next-submission-info" class="text-sm text-gray-400 mt-2"></p>
+                    </div>
+                    <div class="bg-gray-900 p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-bold mb-4 text-white">Submission History</h3>
+                        <div id="history-list" class="space-y-4 history-item-container pr-2">
+                            <p class="text-gray-400">No submissions yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 rounded-xl shadow-lg leaderboard-container">
+                    <h2 class="text-3xl font-bold mb-4 text-center text-white">Leaderboard</h2>
+                    <div id="leaderboard" class="space-y-3">
+                        <p class="text-center text-white">Loading leaderboard...</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-gray-900 p-6 rounded-xl shadow-lg leaderboard-gradient">
-                <h2 class="text-3xl font-bold mb-4 text-center text-white">🏆 Leaderboard 🏆</h2>
-                <div id="leaderboard" class="space-y-3">
-                    <p class="text-center text-white">Loading leaderboard...</p>
+            <div class="lg:hidden">
+                <div class="bg-gray-900 p-4 rounded-xl shadow-lg mb-4">
+                    <div class="text-center mb-4">
+                        <span class="text-sm text-gray-400">Welcome back, </span>
+                        <span id="mobile-user-name" class="font-bold text-[#f79aaf]"></span>
+                    </div>
+                    <div class="compact-stats">
+                        <div class="compact-stat-item">
+                            <div class="text-2xl font-bold text-[#f79aaf]" id="mobile-user-view-count">0</div>
+                            <div class="text-xs text-gray-400">Total Views</div>
+                        </div>
+                        <div class="compact-stat-item">
+                            <div class="text-sm font-semibold text-gray-300" id="mobile-user-last-submission">N/A</div>
+                            <div class="text-xs text-gray-400">Last Submission</div>
+                        </div>
+                    </div>
+                    <p id="mobile-next-submission-info" class="text-xs text-gray-400 mt-2 text-center"></p>
+                </div>
+
+                <div class="flex bg-gray-800 rounded-lg p-1 mb-4">
+                    <button id="upload-tab" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all active">
+                        📸 Upload
+                    </button>
+                    <button id="leaderboard-tab" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all">
+                        🏆 Leaderboard
+                    </button>
+                    <button id="history-tab" class="tab-button flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all">
+                        📋 History
+                    </button>
+                </div>
+
+                <div class="mobile-tab-content">
+                    <div id="upload-content" class="tab-content">
+                        <div class="bg-gray-900 p-4 rounded-xl shadow-lg">
+                            <h2 class="text-xl font-bold mb-3 text-white">Upload Screenshot</h2>
+                            <p class="mb-4 text-sm text-gray-400">Upload a screenshot of BLACKPINK's "JUMP" M/V with system clock visible.</p>
+                            <input type="file" id="mobile-image-upload" accept="image/*" class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-700 file:text-[#f79aaf] hover:file:bg-[#f79aaf] hover:file:text-white">
+
+                            <div id="mobile-image-preview-container" class="mt-4 hidden w-full h-48 bg-gray-800 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-600">
+                                <img id="mobile-image-preview" src="#" alt="Preview" class="max-h-full max-w-full rounded-md object-contain">
+                            </div>
+
+                            <button id="mobile-submit-btn" class="w-full mt-4 bg-[#f79aaf] text-white font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition disabled:bg-gray-400 flex items-center justify-center" disabled>
+                                <span id="mobile-submit-btn-text">Submit for View Count</span>
+                                <svg id="mobile-submit-spinner" class="animate-spin h-5 w-5 ml-3 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5m15-5a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="leaderboard-content" class="tab-content hidden">
+                        <div class="p-4 rounded-xl shadow-lg leaderboard-container">
+                            <h2 class="text-2xl font-bold mb-4 text-center text-white">🏆 Leaderboard</h2>
+                            <div id="mobile-leaderboard" class="space-y-3">
+                                <p class="text-center text-white">Loading leaderboard...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="history-content" class="tab-content hidden">
+                        <div class="bg-gray-900 p-4 rounded-xl shadow-lg">
+                            <h3 class="text-xl font-bold mb-4 text-white">📋 Submission History</h3>
+                            <div id="mobile-history-list" class="space-y-3">
+                                <p class="text-gray-400">No submissions yet.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -112,181 +262,306 @@
         <div class="modal-content">
             <h3 id="modal-title" class="text-2xl font-bold mb-2 text-white"></h3>
             <p id="modal-message" class="mb-4"></p>
+            <img id="modal-gif" src="" alt="BLACKPINK GIF" class="hidden mx-auto my-4 rounded-lg" style="max-height: 200px;">
             <button id="modal-close-btn" class="bg-[#f79aaf] text-white px-6 py-2 rounded-lg hover:bg-opacity-90">Close</button>
         </div>
     </div>
 
 
-    <script type="module">
-        // --- Firebase SDK Imports ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, limit, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+<script type="module">
+    // --- Firebase SDK Imports ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, where, getDocs, limit, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase Config ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAmj_MCi0S5oWccuAllapmCSgS1wgh7YtQ",
-            authDomain: "view-counter-6d58c.firebaseapp.com",
-            projectId: "view-counter-6d58c",
-            storageBucket: "view-counter-6d58c.appspot.com",
-            messagingSenderId: "796950664723",
-            appId: "1:796950664723:web:f4589638e698642f5211e6"
-        };
+    // --- Firebase Config ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAmj_MCi0S5oWccuAllapmCSgS1wgh7YtQ",
+        authDomain: "view-counter-6d58c.firebaseapp.com",
+        projectId: "view-counter-6d58c",
+        storageBucket: "view-counter-6d58c.appspot.com",
+        messagingSenderId: "796950664723",
+        appId: "1:796950664723:web:f4589638e698642f5211e6"
+    };
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
-        // --- Firebase Initialization ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+    // --- Firebase Initialization ---
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // --- DOM Elements ---
-        const authSection = document.getElementById('auth-section');
-        const appSection = document.getElementById('app-section');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const showRegister = document.getElementById('show-register');
-        const showLogin = document.getElementById('show-login');
-        const loginBtn = document.getElementById('login-btn');
-        const registerBtn = document.getElementById('register-btn');
-        const loginEmail = document.getElementById('login-email');
-        const loginPassword = document.getElementById('login-password');
-        const registerName = document.getElementById('register-name');
-        const registerEmail = document.getElementById('register-email');
-        const registerPassword = document.getElementById('register-password');
-        const authError = document.getElementById('auth-error');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userNameSpan = document.getElementById('user-name');
-        const imageUpload = document.getElementById('image-upload');
-        const imagePreviewContainer = document.getElementById('image-preview-container');
-        const imagePreview = document.getElementById('image-preview');
-        const submitBtn = document.getElementById('submit-btn');
-        const submitBtnText = document.getElementById('submit-btn-text');
-        const submitSpinner = document.getElementById('submit-spinner');
-        const userViewCount = document.getElementById('user-view-count');
-        const userLastSubmission = document.getElementById('user-last-submission');
-        const nextSubmissionInfo = document.getElementById('next-submission-info');
-        const leaderboardDiv = document.getElementById('leaderboard');
-        const modal = document.getElementById('modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-        const modalCloseBtn = document.getElementById('modal-close-btn');
+    // --- DOM Elements ---
+    const authSection = document.getElementById('auth-section');
+    const appSection = document.getElementById('app-section');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const showRegister = document.getElementById('show-register');
+    const showLogin = document.getElementById('show-login');
+    const loginBtn = document.getElementById('login-btn');
+    const registerBtn = document.getElementById('register-btn');
+    const loginEmail = document.getElementById('login-email');
+    const loginPassword = document.getElementById('login-password');
+    const registerName = document.getElementById('register-name');
+    const registerEmail = document.getElementById('register-email');
+    const registerPassword = document.getElementById('register-password');
+    const authError = document.getElementById('auth-error');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userNameSpan = document.getElementById('user-name');
+    
+    // Desktop elements
+    const imageUpload = document.getElementById('image-upload');
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    const imagePreview = document.getElementById('image-preview');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitBtnText = document.getElementById('submit-btn-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const userViewCount = document.getElementById('user-view-count');
+    const userLastSubmission = document.getElementById('user-last-submission');
+    const nextSubmissionInfo = document.getElementById('next-submission-info');
+    const leaderboardDiv = document.getElementById('leaderboard');
+    const historyListDiv = document.getElementById('history-list');
+    
+    // Mobile elements
+    const mobileUserName = document.getElementById('mobile-user-name');
+    const mobileImageUpload = document.getElementById('mobile-image-upload');
+    const mobileImagePreviewContainer = document.getElementById('mobile-image-preview-container');
+    const mobileImagePreview = document.getElementById('mobile-image-preview');
+    const mobileSubmitBtn = document.getElementById('mobile-submit-btn');
+    const mobileSubmitBtnText = document.getElementById('mobile-submit-btn-text');
+    const mobileSubmitSpinner = document.getElementById('mobile-submit-spinner');
+    const mobileUserViewCount = document.getElementById('mobile-user-view-count');
+    const mobileUserLastSubmission = document.getElementById('mobile-user-last-submission');
+    const mobileNextSubmissionInfo = document.getElementById('mobile-next-submission-info');
+    const mobileLeaderboardDiv = document.getElementById('mobile-leaderboard');
+    const mobileHistoryListDiv = document.getElementById('mobile-history-list');
+    
+    // Tab elements
+    const uploadTab = document.getElementById('upload-tab');
+    const leaderboardTab = document.getElementById('leaderboard-tab');
+    const historyTab = document.getElementById('history-tab');
+    const uploadContent = document.getElementById('upload-content');
+    const leaderboardContent = document.getElementById('leaderboard-content');
+    const historyContent = document.getElementById('history-content');
+    
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMessage = document.getElementById('modal-message');
+    const modalGif = document.getElementById('modal-gif');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
 
-        let currentUser = null;
-        let userDocUnsubscribe = null;
-        let leaderboardUnsubscribe = null;
-        let file = null;
+    // Countdown elements
+    const countdownBanner = document.getElementById('countdown-banner');
+    const closeCountdownBtn = document.getElementById('close-countdown-btn');
+    const daysEl = document.getElementById('days');
+    const hoursEl = document.getElementById('hours');
+    const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
 
-        // --- Authentication Logic ---
-        showRegister.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
-            authError.textContent = '';
-        });
+    let currentUser = null;
+    let userDocUnsubscribe = null;
+    let leaderboardUnsubscribe = null;
+    let historyUnsubscribe = null;
+    let file = null;
 
-        showLogin.addEventListener('click', (e) => {
-            e.preventDefault();
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-            authError.textContent = '';
-        });
+    const blackpinkGifs = [
+        'https://media.tenor.com/ydQ-071GBxQAAAAj/jennie-pink.gif',
+        'https://media.tenor.com/2kd52AeimKoAAAAi/blackpink-blackpinkrose.gif',
+        'https://media.tenor.com/8oK6Hws2Z-cAAAAm/jennie-chaenie.webp',
+        'https://media.tenor.com/soNLf9EjawEAAAAm/rose-smile.webp',
+        'https://media.tenor.com/ZP41q6E5ndAAAAAm/aww-omo.webp',
+        'https://media.tenor.com/l5tGAr4dby4AAAAm/oink-wow.webp',
+        'https://media.tenor.com/vnSTDx_yybsAAAAm/hello-its.webp',
+        'https://media.tenor.com/OXdq8DQCPFYAAAAi/jisoo-pink.gif',
+        'https://media.tenor.com/vEV4MW2yqPAAAAAM/amazed-wow.gif'
 
-        registerBtn.addEventListener('click', async () => {
-            authError.textContent = '';
-            if (!registerName.value) {
-                authError.textContent = 'Please enter your name.';
-                return;
-            }
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, registerEmail.value, registerPassword.value);
-                const user = userCredential.user;
-                const userRef = doc(db, `artifacts/${appId}/public/data/users`, user.uid);
-                await setDoc(userRef, {
-                    name: registerName.value,
-                    email: user.email,
-                    viewCount: 0,
-                    lastScreenshotTime: null,
-                    userId: user.uid
-                });
-            } catch (error) {
-                authError.textContent = error.message;
-            }
-        });
+    ];
 
-        loginBtn.addEventListener('click', async () => {
-            authError.textContent = '';
-            try {
-                await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
-            } catch (error) {
-                authError.textContent = error.message;
-            }
-        });
+    // --- Countdown Timer Logic ---
+    const releaseDate = new Date('2025-07-11T09:30:00');
 
-        logoutBtn.addEventListener('click', async () => {
-            await signOut(auth);
-        });
+    function updateCountdown() {
+        const now = new Date();
+        const distance = releaseDate - now;
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                authSection.classList.add('hidden');
-                appSection.classList.remove('hidden');
-                listenToUserData(user.uid);
-                listenToLeaderboard();
-            } else {
-                currentUser = null;
-                authSection.classList.remove('hidden');
-                appSection.classList.add('hidden');
-                if (userDocUnsubscribe) userDocUnsubscribe();
-                if (leaderboardUnsubscribe) leaderboardUnsubscribe();
-            }
-        });
-
-        // --- Firestore Listeners ---
-        function listenToUserData(userId) {
-            const userRef = doc(db, `artifacts/${appId}/public/data/users`, userId);
-            userDocUnsubscribe = onSnapshot(userRef, (doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    userNameSpan.textContent = data.name;
-                    userViewCount.textContent = data.viewCount;
-                    if (data.lastScreenshotTime) {
-                        const date = new Date(data.lastScreenshotTime);
-                        userLastSubmission.textContent = date.toLocaleString();
-
-                        // Only show cooldown message after initial views are used up
-                        if (data.viewCount >= 3) {
-                            const tenMinutes = 10 * 60 * 1000;
-                            const nextSubmissionTime = date.getTime() + tenMinutes;
-                            const now = Date.now();
-                            if (now < nextSubmissionTime) {
-                                const minutesLeft = Math.ceil((nextSubmissionTime - now) / 60000);
-                                nextSubmissionInfo.textContent = `You can submit your next view in about ${minutesLeft} minute(s).`;
-                            } else {
-                                nextSubmissionInfo.textContent = 'You are eligible to submit a new view.';
-                            }
-                        } else {
-                            nextSubmissionInfo.textContent = 'You are eligible to submit a new view.';
-                        }
-
-                    } else {
-                        userLastSubmission.textContent = 'N/A';
-                        nextSubmissionInfo.textContent = 'Upload a screenshot to get started!';
-                    }
-                }
-            });
+        if (distance < 0) {
+            clearInterval(countdownInterval);
+            countdownBanner.classList.add('hidden');
+            return;
         }
 
-        function listenToLeaderboard() {
-            const usersRef = collection(db, `artifacts/${appId}/public/data/users`);
-            const q = query(usersRef, orderBy("viewCount", "desc"), limit(10));
-            leaderboardUnsubscribe = onSnapshot(q, (snapshot) => {
-                leaderboardDiv.innerHTML = '';
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        daysEl.textContent = String(days).padStart(2, '0');
+        hoursEl.textContent = String(hours).padStart(2, '0');
+        minutesEl.textContent = String(minutes).padStart(2, '0');
+        secondsEl.textContent = String(seconds).padStart(2, '0');
+    }
+
+    const countdownInterval = setInterval(updateCountdown, 1000);
+    updateCountdown(); 
+
+    closeCountdownBtn.addEventListener('click', () => {
+        countdownBanner.classList.add('hidden');
+        clearInterval(countdownInterval);
+    });
+
+
+    // --- Tab Management ---
+    function switchTab(activeTab) {
+        // Remove active class from all tabs
+        [uploadTab, leaderboardTab, historyTab].forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Hide all content
+        [uploadContent, leaderboardContent, historyContent].forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Activate selected tab
+        activeTab.classList.add('active');
+        
+        // Show corresponding content
+        if (activeTab === uploadTab) {
+            uploadContent.classList.remove('hidden');
+        } else if (activeTab === leaderboardTab) {
+            leaderboardContent.classList.remove('hidden');
+        } else if (activeTab === historyTab) {
+            historyContent.classList.remove('hidden');
+        }
+    }
+
+    uploadTab.addEventListener('click', () => switchTab(uploadTab));
+    leaderboardTab.addEventListener('click', () => switchTab(leaderboardTab));
+    historyTab.addEventListener('click', () => switchTab(historyTab));
+
+    // --- Authentication Logic ---
+    showRegister.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        authError.textContent = '';
+    });
+
+    showLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        registerForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+        authError.textContent = '';
+    });
+
+    registerBtn.addEventListener('click', async () => {
+        authError.textContent = '';
+        if (!registerName.value) {
+            authError.textContent = 'Please enter your name.';
+            return;
+        }
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, registerEmail.value, registerPassword.value);
+            const user = userCredential.user;
+            const userRef = doc(db, `artifacts/${appId}/public/data/users`, user.uid);
+            await setDoc(userRef, {
+                name: registerName.value,
+                email: user.email,
+                viewCount: 0,
+                lastScreenshotTime: null,
+                userId: user.uid
+            });
+        } catch (error) {
+            authError.textContent = error.message;
+        }
+    });
+
+    loginBtn.addEventListener('click', async () => {
+        authError.textContent = '';
+        try {
+            await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+        } catch (error) {
+            authError.textContent = error.message;
+        }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+        await signOut(auth);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            authSection.classList.add('hidden');
+            appSection.classList.remove('hidden');
+            listenToUserData(user.uid);
+            listenToLeaderboard();
+            listenToSubmissionHistory(user.uid);
+        } else {
+            currentUser = null;
+            authSection.classList.remove('hidden');
+            appSection.classList.add('hidden');
+            if (userDocUnsubscribe) userDocUnsubscribe();
+            if (leaderboardUnsubscribe) leaderboardUnsubscribe();
+            if (historyUnsubscribe) historyUnsubscribe();
+        }
+    });
+
+    // --- Firestore Listeners ---
+    function listenToUserData(userId) {
+        const userRef = doc(db, `artifacts/${appId}/public/data/users`, userId);
+        userDocUnsubscribe = onSnapshot(userRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                
+                // Update both desktop and mobile elements
+                userNameSpan.textContent = data.name;
+                mobileUserName.textContent = data.name;
+                userViewCount.textContent = data.viewCount;
+                mobileUserViewCount.textContent = data.viewCount;
+                
+                if (data.lastScreenshotTime) {
+                    const date = new Date(data.lastScreenshotTime);
+                    const timeString = date.toLocaleString();
+                    userLastSubmission.textContent = timeString;
+                    mobileUserLastSubmission.textContent = timeString;
+
+                    let infoText = '';
+                    if (data.viewCount >= 3) {
+                        const fiveMinutes = 5 * 60 * 1000;
+                        const nextSubmissionTime = date.getTime() + fiveMinutes;
+                        const now = Date.now();
+                        if (now < nextSubmissionTime) {
+                            const minutesLeft = Math.ceil((nextSubmissionTime - now) / 60000);
+                            infoText = `You can submit your next view in about ${minutesLeft} minute(s).`;
+                        } else {
+                            infoText = 'You are eligible to submit a new view.';
+                        }
+                    } else {
+                        infoText = 'You are eligible to submit a new view.';
+                    }
+                    nextSubmissionInfo.textContent = infoText;
+                    mobileNextSubmissionInfo.textContent = infoText;
+                } else {
+                    userLastSubmission.textContent = 'N/A';
+                    mobileUserLastSubmission.textContent = 'N/A';
+                    const infoText = 'Upload a screenshot to get started!';
+                    nextSubmissionInfo.textContent = infoText;
+                    mobileNextSubmissionInfo.textContent = infoText;
+                }
+            }
+        });
+    }
+
+    function listenToLeaderboard() {
+        const usersRef = collection(db, `artifacts/${appId}/public/data/users`);
+        const q = query(usersRef, orderBy("viewCount", "desc"), limit(10));
+        leaderboardUnsubscribe = onSnapshot(q, (snapshot) => {
+            // Update both desktop and mobile leaderboards
+            [leaderboardDiv, mobileLeaderboardDiv].forEach(container => {
+                container.innerHTML = '';
                 if (snapshot.empty) {
-                    leaderboardDiv.innerHTML = '<p class="text-center text-white">No submissions yet.</p>';
+                    container.innerHTML = '<p class="text-center text-white">No submissions yet.</p>';
                     return;
                 }
                 let rank = 1;
@@ -295,194 +570,316 @@
                     const user = doc.data();
                     const isCurrentUser = user.userId === currentUser?.uid;
                     const entry = document.createElement('div');
-                    entry.className = `flex justify-between items-center p-3 rounded-lg transition-transform transform hover:scale-105 ${isCurrentUser ? 'bg-white/20 border-2 border-white' : 'bg-black/20'}`;
+                    
+                    const rankClass = rank <= 3 ? `rank-${rank}` : 'rank-default';
+                    let textColor = 'text-white';
+                    if (rank <= 3) {
+                        textColor = 'text-gray-900';
+                    }
+
+                    entry.className = `flex justify-between items-center p-3 rounded-lg transition-transform transform hover:scale-105 ${rankClass}`;
+                    
+                    if(isCurrentUser) {
+                        entry.classList.add('current-user-highlight');
+                    }
 
                     const rankIcon = rank <= 3 ? rankIcons[rank - 1] : `<span class="font-bold w-6 text-white">${rank}.</span>`;
-
+                    
                     entry.innerHTML = `
                         <div class="flex items-center gap-3">
                             ${rankIcon}
-                            <span class="font-bold text-lg text-white">${user.name}</span>
-                            ${isCurrentUser ? '<span class="text-xs font-semibold bg-white text-[#f79aaf] px-2 py-1 rounded-full">You</span>' : ''}
+                            <span class="font-bold text-lg ${textColor}">${user.name}</span>
+                            ${isCurrentUser ? `<span class="text-xs font-semibold bg-white text-[#f79aaf] px-2 py-1 rounded-full">You</span>` : ''}
                         </div>
-                        <span class="font-bold text-xl text-white">${user.viewCount}</span>
-                    `;
-                    leaderboardDiv.appendChild(entry);
+                        <span class="font-bold text-xl ${textColor}">${user.viewCount}</span>`;
+                    
+                    container.appendChild(entry);
                     rank++;
                 });
             });
-        }
+        });
+    }
 
-        // --- App Logic ---
-        imageUpload.addEventListener('change', (event) => {
+    function listenToSubmissionHistory(userId) {
+        const submissionsRef = collection(db, `artifacts/${appId}/public/data/users`, userId, 'submissions');
+        historyUnsubscribe = onSnapshot(submissionsRef, (snapshot) => {
+            // Update both desktop and mobile history
+            [historyListDiv, mobileHistoryListDiv].forEach(container => {
+                container.innerHTML = '';
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-gray-400">No submissions yet.</p>';
+                    return;
+                }
+
+                const submissions = snapshot.docs.map(doc => doc.data());
+
+                // Robustly sort by analyzed time in descending order
+                submissions.sort((a, b) => {
+                    const dateA = new Date(a.analyzedScreenshotTime);
+                    const dateB = new Date(b.analyzedScreenshotTime);
+                    if (isNaN(dateB.getTime())) return -1;
+                    if (isNaN(dateA.getTime())) return 1;
+                    return dateB - dateA;
+                });
+
+                submissions.forEach(sub => {
+                    const item = document.createElement('div');
+                    const isMobile = container === mobileHistoryListDiv;
+                    
+                    if (isMobile) {
+                        item.className = 'bg-gray-800 p-3 rounded-lg flex items-center gap-3';
+                    } else {
+                        item.className = 'bg-gray-800 p-3 rounded-lg flex items-center gap-4';
+                    }
+                    
+                    const screenshotSrc = `data:image/jpeg;base64,${sub.screenshotBase64}`;
+                    
+                    // Check for valid date before creating the time string
+                    let analyzedTimeString = '';
+                    if (sub.analyzedScreenshotTime) {
+                        const d = new Date(sub.analyzedScreenshotTime);
+                        if (!isNaN(d.getTime())) { // Check if the date is valid
+                            analyzedTimeString = d.toLocaleString();
+                        }
+                    }
+
+                    const imageSize = isMobile ? 'w-16 h-12' : 'w-24 h-16';
+                    
+                    item.innerHTML = `
+                        <img src="${screenshotSrc}" alt="Submission screenshot" class="${imageSize} object-cover rounded-md">
+                        <div>
+                            <p class="text-gray-300 text-sm">${sub.analyzedScreenshotTime}</p>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            });
+        });
+    }
+
+    // --- App Logic ---
+    function setupImageUpload(uploadElement, previewContainer, previewElement, submitButton) {
+        uploadElement.addEventListener('change', (event) => {
             file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    imagePreview.src = e.target.result;
-                    imagePreviewContainer.classList.remove('hidden');
+                    previewElement.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
                 };
                 reader.readAsDataURL(file);
-                submitBtn.disabled = false;
+                submitButton.disabled = false;
             }
         });
+    }
 
-        submitBtn.addEventListener('click', async () => {
+    // Setup both desktop and mobile image uploads
+    setupImageUpload(imageUpload, imagePreviewContainer, imagePreview, submitBtn);
+    setupImageUpload(mobileImageUpload, mobileImagePreviewContainer, mobileImagePreview, mobileSubmitBtn);
+
+    function setupSubmitButton(submitButton, submitTextElement, submitSpinnerElement) {
+        submitButton.addEventListener('click', async () => {
             if (!file || !currentUser) return;
-            setLoading(true);
+            setLoading(true, 'Checking for duplicates...', submitButton, submitTextElement, submitSpinnerElement);
 
             try {
-                // 1. Analyze image first
-                const base64ImageData = await toBase64(file);
-                const analysis = await analyzeImage(base64ImageData);
+                const imageHash = await generateImageHash(file);
+                const submissionsRef = collection(db, `artifacts/${appId}/public/data/users`, currentUser.uid, 'submissions');
+                const q = query(submissionsRef, where("imageHash", "==", imageHash), limit(1));
+                const querySnapshot = await getDocs(q);
 
-                if (!analysis || !analysis.videoTitle || !analysis.channelName) {
-                    showModal('Analysis Failed', 'Could not identify the video details. Please try a clearer screenshot from the official channel.');
-                    setLoading(false);
+                if (!querySnapshot.empty) {
+                    showModal('Duplicate Submission', 'This exact screenshot has already been submitted. Please upload a new one.');
+                    setLoading(false, 'Submit for View Count', submitButton, submitTextElement, submitSpinnerElement);
                     return;
                 }
 
-                // 2. Validate video title and channel
+                setLoading(true, 'Compressing & Analyzing...', submitButton, submitTextElement, submitSpinnerElement);
+                const compressedBase64 = await compressImage(file, 0.7, 1280);
+                const analysis = await analyzeImage(compressedBase64);
+
+                if (!analysis || !analysis.videoTitle || !analysis.channelName || !analysis.screenshotTime) {
+                    showModal('Analysis Failed', 'Could not identify video and time details. Please try a clearer screenshot with the system clock visible.');
+                    setLoading(false, 'Submit for View Count', submitButton, submitTextElement, submitSpinnerElement);
+                    return;
+                }
+
                 const isCorrectVideo = analysis.videoTitle.toLowerCase().includes('jump');
                 const isCorrectChannel = analysis.channelName.toLowerCase().includes('blackpink');
 
                 if (!isCorrectVideo || !isCorrectChannel) {
-                    showModal('Incorrect Video', `This doesn't seem to be the "JUMP" M/V from BLACKPINK's official channel. Please try again.`);
-                    setLoading(false);
+                    showModal('Incorrect Video', `This doesn't seem to be the "JUMP" M/V from BLACKPINK's official channel.`);
+                    setLoading(false, 'Submit for View Count', submitButton, submitTextElement, submitSpinnerElement);
                     return;
                 }
 
-                // 3. Upload screenshot ONLY if valid
-                const screenshotUrl = await uploadScreenshot(file);
-
-                // 4. Process the view count
-                await processViewCount(screenshotUrl, analysis);
+                await processViewCount(compressedBase64, analysis, imageHash);
 
             } catch (error) {
                 console.error("Submission Error:", error);
-                showModal('Error', 'An unexpected error occurred. Please try again.');
+                showModal('Error', `An unexpected error occurred: ${error.message}.`);
             } finally {
-                setLoading(false);
+                setLoading(false, 'Submit for View Count', submitButton, submitTextElement, submitSpinnerElement);
             }
         });
+    }
 
-        async function uploadScreenshot(file) {
-            const filePath = `artifacts/${appId}/public/screenshots/${currentUser.uid}/${Date.now()}-${file.name}`;
-            const storageRef = ref(storage, filePath);
-            await uploadBytes(storageRef, file);
-            const downloadUrl = await getDownloadURL(storageRef);
-            return downloadUrl;
+    // Setup both desktop and mobile submit buttons
+    setupSubmitButton(submitBtn, submitBtnText, submitSpinner);
+    setupSubmitButton(mobileSubmitBtn, mobileSubmitBtnText, mobileSubmitSpinner);
+
+    async function processViewCount(screenshotBase64, analysis, imageHash) {
+        const userRef = doc(db, `artifacts/${appId}/public/data/users`, currentUser.uid);
+        const userDoc = await getDoc(userRef);
+        if (!userDoc.exists()) {
+            showModal('Error', 'Could not find your user data.');
+            return;
         }
 
-        async function processViewCount(screenshotUrl, analysis) {
-            const userRef = doc(db, `artifacts/${appId}/public/data/users`, currentUser.uid);
-            const userDoc = await getDoc(userRef);
-            if (!userDoc.exists()) {
-                showModal('Error', 'Could not find your user data.');
-                return;
-            }
+        const userData = userDoc.data();
+        const viewCount = userData.viewCount;
+        const currentAnalyzedTime = new Date(analysis.screenshotTime);
 
-            const userData = userDoc.data();
-            const viewCount = userData.viewCount;
-            const lastTime = userData.lastScreenshotTime ? new Date(userData.lastScreenshotTime) : null;
-            const newTime = new Date();
+        if (viewCount >= 3) {
+            const submissionsRef = collection(db, `artifacts/${appId}/public/data/users`, currentUser.uid, 'submissions');
+            const allSubmissionsSnapshot = await getDocs(submissionsRef);
+            const fifteenMinutes = 15 * 60 * 1000;
 
-            const canSubmit = () => {
-                if (viewCount < 3) return true; // Allow first 3 submissions without time check
-                const tenMinutes = 10 * 60 * 1000;
-                return !lastTime || (newTime.getTime() - lastTime.getTime()) >= tenMinutes;
-            };
-
-            if (canSubmit()) {
-                // Add to submissions sub-collection
-                const submissionsRef = collection(db, `artifacts/${appId}/public/data/users`, currentUser.uid, 'submissions');
-                await addDoc(submissionsRef, {
-                    screenshotUrl: screenshotUrl,
-                    analyzedVideoTitle: analysis.videoTitle,
-                    analyzedChannelName: analysis.channelName,
-                    analyzedScreenshotTime: analysis.screenshotTime,
-                    submittedAt: serverTimestamp()
-                });
-
-                // Update user's main doc
-                await setDoc(userRef, { viewCount: viewCount + 1, lastScreenshotTime: newTime.toISOString() }, { merge: true });
-                showModal('Success!', 'Your view has been counted! Keep streaming, BLINK!');
-            } else {
-                const tenMinutes = 10 * 60 * 1000;
-                const minutesLeft = Math.ceil((tenMinutes - (newTime.getTime() - lastTime.getTime())) / 60000);
-                showModal('Too Soon!', `Please wait another ${minutesLeft} minute(s) before submitting again.`);
-            }
-        }
-
-        // --- Gemini API Call ---
-        async function analyzeImage(base64ImageData) {
-            const apiKey = "AIzaSyDPVkg07j7e_c3zD36plO3arVAd2qU6sn8"; // Provided by environment
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-            const prompt = "Analyze this YouTube screenshot. What is the video title? What is the YouTube channel name? What is the time displayed in the system's clock (e.g., top right or bottom right of the screen)? Respond ONLY with a JSON object with three keys: `videoTitle` (string), `channelName` (string), and `screenshotTime` (string). If any piece of information isn't clear or visible, set its corresponding value to null.";
-
-            const payload = {
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        { inline_data: { mime_type: file.type, data: base64ImageData } }
-                    ]
-                }],
-                generation_config: { response_mime_type: "application/json" }
-            };
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) throw new Error(`API request failed: ${response.statusText}`);
-
-            const result = await response.json();
-
-            if (result.candidates && result.candidates.length > 0) {
-                try {
-                     return JSON.parse(result.candidates[0].content.parts[0].text);
-                } catch(e) {
-                    console.error("Failed to parse JSON from Gemini:", e);
-                    return null;
+            for (const submissionDoc of allSubmissionsSnapshot.docs) {
+                const prevSubmissionData = submissionDoc.data();
+                if (prevSubmissionData.analyzedScreenshotTime) {
+                    const prevAnalyzedTime = new Date(prevSubmissionData.analyzedScreenshotTime);
+                    if (!isNaN(prevAnalyzedTime.getTime())) { // Only check against valid dates
+                        const timeDifference = Math.abs(currentAnalyzedTime.getTime() - prevAnalyzedTime.getTime());
+                        if (timeDifference < fifteenMinutes) {
+                            showModal('Time Conflict', 'Make sure there is at least a 15 min gap between streams, watch other BP M/Vs!');
+                            return;
+                        }
+                    }
                 }
             }
-            return null;
         }
 
-        // --- Utility Functions ---
-        function toBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result.toString().replace(/^data:(.*,)?/, ''));
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        function setLoading(isLoading) {
-            submitBtn.disabled = isLoading;
-            if (isLoading) {
-                submitBtnText.textContent = 'Analyzing...';
-                submitSpinner.classList.remove('hidden');
-            } else {
-                submitBtnText.textContent = 'Submit for View Count';
-                submitSpinner.classList.add('hidden');
-            }
-        }
-
-        function showModal(title, message) {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modal.classList.remove('hidden');
-        }
-
-        modalCloseBtn.addEventListener('click', () => {
-            modal.classList.add('hidden');
+        const submissionsCollectionRef = collection(db, `artifacts/${appId}/public/data/users`, currentUser.uid, 'submissions');
+        await addDoc(submissionsCollectionRef, {
+            imageHash: imageHash,
+            screenshotBase64: screenshotBase64,
+            analyzedVideoTitle: analysis.videoTitle,
+            analyzedChannelName: analysis.channelName,
+            analyzedScreenshotTime: analysis.screenshotTime,
+            submittedAt: serverTimestamp()
         });
 
-    </script>
+        await setDoc(userRef, {
+            viewCount: viewCount + 1,
+            lastScreenshotTime: new Date().toISOString()
+        }, {
+            merge: true
+        });
+
+        const randomGifUrl = blackpinkGifs[Math.floor(Math.random() * blackpinkGifs.length)];
+        showModal('Success!', 'Your view has been counted! Keep streaming, BLINK!', randomGifUrl);
+    }
+
+    // --- Gemini API Call ---
+    async function analyzeImage(base64ImageData) {
+        const apiKey = "AIzaSyDPVkg07j7e_c3zD36plO3arVAd2qU6sn8";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const prompt = "Analyze this YouTube screenshot. What is the video title? What is the YouTube channel name? What is the time displayed in the system's clock (e.g., top right or bottom right of the screen)? Respond ONLY with a JSON object with three keys: `videoTitle` (string), `channelName` (string), and `screenshotTime` (string). If any piece of information isn't clear or visible, set its corresponding value to null.";
+
+        const payload = {
+            contents: [{
+                parts: [
+                    { text: prompt },
+                    { inline_data: { mime_type: "image/jpeg", data: base64ImageData } }
+                ]
+            }],
+            generation_config: { response_mime_type: "application/json" }
+        };
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) throw new Error(`API request failed: ${response.statusText}`);
+        const result = await response.json();
+
+        if (result.candidates && result.candidates.length > 0) {
+            try {
+                 return JSON.parse(result.candidates[0].content.parts[0].text);
+            } catch(e) {
+                console.error("Failed to parse JSON from Gemini:", e);
+                return null;
+            }
+        }
+        return null;
+    }
+
+    // --- Utility Functions ---
+    async function generateImageHash(file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+
+    function compressImage(file, quality, maxWidth) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scaleRatio = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scaleRatio;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const compressedDataUrl = ctx.canvas.toDataURL("image/jpeg", quality);
+                    resolve(compressedDataUrl.replace(/^data:image\/jpeg;base64,/, ''));
+                };
+                img.onerror = (error) => reject(error);
+            };
+            reader.onerror = (error) => reject(error);
+        });
+    }
+
+    function setLoading(isLoading, message = 'Submit for View Count', submitButton, submitTextElement, submitSpinnerElement) {
+        submitButton.disabled = isLoading;
+        if (isLoading) {
+            submitTextElement.textContent = message;
+            submitSpinnerElement.classList.remove('hidden');
+        } else {
+            submitTextElement.textContent = 'Submit for View Count';
+            submitSpinnerElement.classList.add('hidden');
+        }
+    }
+
+    function showModal(title, message, gifUrl = null) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+
+        if (gifUrl) {
+            modalGif.src = gifUrl;
+            modalGif.classList.remove('hidden');
+        } else {
+            modalGif.classList.add('hidden');
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    modalCloseBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+</script>
 </body>
 </html>

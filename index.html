@@ -527,16 +527,13 @@
                     mobileUserLastSubmission.textContent = timeString;
 
                     let infoText = '';
-                    if (data.viewCount >= 3) {
-                        const fiveMinutes = 5 * 60 * 1000;
-                        const nextSubmissionTime = date.getTime() + fiveMinutes;
-                        const now = Date.now();
-                        if (now < nextSubmissionTime) {
-                            const minutesLeft = Math.ceil((nextSubmissionTime - now) / 60000);
-                            infoText = `You can submit your next view in about ${minutesLeft} minute(s).`;
-                        } else {
-                            infoText = 'You are eligible to submit a new view.';
-                        }
+                    const tenMinutes = 10 * 60 * 1000;
+                    const nextSubmissionTime = date.getTime() + tenMinutes;
+                    const now = Date.now();
+
+                    if (now < nextSubmissionTime) {
+                        const minutesLeft = Math.ceil((nextSubmissionTime - now) / 60000);
+                        infoText = `You can submit your next view in about ${minutesLeft} minute(s).`;
                     } else {
                         infoText = 'You are eligible to submit a new view.';
                     }
@@ -737,28 +734,16 @@
         }
 
         const userData = userDoc.data();
-        const viewCount = userData.viewCount;
-        const currentAnalyzedTime = new Date(analysis.screenshotTime);
+        const lastSubmissionTime = userData.lastScreenshotTime ? new Date(userData.lastScreenshotTime).getTime() : 0;
+        const tenMinutes = 10 * 60 * 1000;
+        const now = Date.now();
 
-        if (viewCount >= 3) {
-            const submissionsRef = collection(db, `artifacts/${appId}/public/data/users`, currentUser.uid, 'submissions');
-            const allSubmissionsSnapshot = await getDocs(submissionsRef);
-            const fifteenMinutes = 15 * 60 * 1000;
-
-            for (const submissionDoc of allSubmissionsSnapshot.docs) {
-                const prevSubmissionData = submissionDoc.data();
-                if (prevSubmissionData.analyzedScreenshotTime) {
-                    const prevAnalyzedTime = new Date(prevSubmissionData.analyzedScreenshotTime);
-                    if (!isNaN(prevAnalyzedTime.getTime())) { // Only check against valid dates
-                        const timeDifference = Math.abs(currentAnalyzedTime.getTime() - prevAnalyzedTime.getTime());
-                        if (timeDifference < fifteenMinutes) {
-                            showModal('Time Conflict', 'Make sure there is at least a 15 min gap between streams, watch other BP M/Vs!');
-                            return;
-                        }
-                    }
-                }
-            }
+        if (lastSubmissionTime && (now - lastSubmissionTime < tenMinutes)) {
+            const minutesLeft = Math.ceil((tenMinutes - (now - lastSubmissionTime)) / 60000);
+            showModal('Time Conflict', `You can submit again in about ${minutesLeft} minute(s). Watch other BP M/Vs!`);
+            return;
         }
+
 
         const submissionsCollectionRef = collection(db, `artifacts/${appId}/public/data/users`, currentUser.uid, 'submissions');
         await addDoc(submissionsCollectionRef, {
@@ -771,7 +756,7 @@
         });
 
         await setDoc(userRef, {
-            viewCount: viewCount + 1,
+            viewCount: userData.viewCount + 1,
             lastScreenshotTime: new Date().toISOString()
         }, {
             merge: true

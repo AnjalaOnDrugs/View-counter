@@ -552,7 +552,7 @@
 
     function listenToLeaderboard() {
         const usersRef = collection(db, `artifacts/${appId}/public/data/users`);
-        const q = query(usersRef, orderBy("viewCount", "desc"), limit(10));
+        const q = query(usersRef, orderBy("viewCount", "desc"), limit(50));
         leaderboardUnsubscribe = onSnapshot(q, (snapshot) => {
             // Update both desktop and mobile leaderboards
             [leaderboardDiv, mobileLeaderboardDiv].forEach(container => {
